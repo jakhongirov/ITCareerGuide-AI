@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Your Results — ITCareerGuide AI</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- Chart.js CDN for the Skill Gap Analysis visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+    <!-- ============================================================
+       ALGORITHM MODULES — load order matters!
+       data.js must load first (other files use studentProfiles)
+       ============================================================ -->
+    <script src="data.js"></script>
+    <script src="decisionTree.js"></script>
+    <script src="knn.js"></script>
+    <script src="recommender.js"></script>
+  </head>
+  <body>
+    <!-- ============================================================
+       NAVBAR
+       ============================================================ -->
+    <header class="navbar">
+      <div class="navbar__inner">
+        <div class="brand">
+          <div class="brand__mark" style="background:white;border-radius:10px;padding:3px;display:flex;align-items:center;justify-content:center;">
+            <!-- ITCareerGuide AI logo icon -->
+            <img src="logo.png" alt="ITCareerGuide AI Logo" style="width:36px;height:36px;object-fit:contain;object-position:center top;" />
+          </div>
+          <div class="brand__text">
+            <span class="brand__title">ITCareerGuide AI</span>
+            <span class="brand__subtitle"
+              >Smart Career Guidance for University Students</span
+            >
+          </div>
+        </div>
+        <div class="nav__status">
+          <span class="status-dot"></span>
+          <span class="label-text">Analysis complete</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="shell">
+      <!-- ============================================================
+         REPORT HEADER
+         ============================================================ -->
+      <section class="report-header">
+        <div class="report-header__top">
+          <div>
+            <h1>Career Analysis Report</h1>
+            <p class="timestamp" id="reportTimestamp">Generated —</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+         STUDENT SUMMARY CARD
+         ============================================================ -->
+      <div class="summary-card">
+        <div class="summary-card__avatar" id="avatarInitial">A</div>
+
+        <div class="summary-card__fields">
+          <div>
+            <div class="summary-field__label">Name</div>
+            <div class="summary-field__value" id="summaryName">—</div>
+          </div>
+          <div>
+            <div class="summary-field__label">Skills</div>
+            <div class="summary-field__value mono" id="summarySkills">—</div>
+          </div>
+          <div>
+            <div class="summary-field__label">Interest</div>
+            <div class="summary-field__value" id="summaryInterest">—</div>
+          </div>
+        </div>
+
+        <div class="summary-card__gpa">
+          <div class="gpa-ring-label">GPA</div>
+          <div class="gpa-ring-value" id="summaryGpa">—</div>
+        </div>
+      </div>
+
+      <!-- ============================================================
+         CAREER MATCH SECTION
+         Visualized as "signal bars" — echoing the KNN similarity
+         concept (signal strength to the nearest career cluster)
+         ============================================================ -->
+      <section class="section">
+        <div class="section__head">
+          <h2><span class="section__index">01 /</span> Career Match</h2>
+          <p>Ranked by similarity to classified career-outcome profiles</p>
+        </div>
+
+        <div class="dt-badge" id="dtBadge" style="
+          display:inline-flex; align-items:center; gap:8px;
+          background:#eef2ff; color:#3730a3; border:1px solid #c7d2fe;
+          border-radius:8px; padding:8px 14px; font-size:0.85rem;
+          margin-bottom:16px;
+        ">
+          <strong>Decision Tree prediction:</strong>
+          <span id="dtCareer">—</span>
+          <span id="dtConfidence" style="opacity:0.75;"></span>
+        </div>
+
+        <div class="match-list" id="matchList">
+          <!-- Match rows are injected by JavaScript -->
+        </div>
+      </section>
+
+      <!-- ============================================================
+         SKILL GAP ANALYSIS SECTION (Chart.js)
+         ============================================================ -->
+      <section class="section">
+        <div class="section__head">
+          <h2><span class="section__index">02 /</span> Skill Gap Analysis</h2>
+          <p>
+            Current proficiency vs. the level your top-matched career typically
+            requires
+          </p>
+        </div>
+
+        <div class="chart-card">
+          <div class="section__head" style="margin-bottom: 4px">
+            <span
+              style="
+                font-family: var(--font-mono);
+                font-size: 0.78rem;
+                color: var(--muted);
+              "
+              >Skill Gap Analysis</span
+            >
+            <div class="chart-card__toggle">
+              <button class="chart-toggle-btn active" data-chart="bar">
+                Bar
+              </button>
+              <button class="chart-toggle-btn" data-chart="radar">Radar</button>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="skillGapChart"></canvas>
+          </div>
+          <div class="gap-legend">
+            <span
+              ><span class="legend-dot" style="background: #2563eb"></span
+              >Current level</span
+            >
+            <span
+              ><span class="legend-dot" style="background: #38bdf8"></span
+              >Required level</span
+            >
+          </div>
+        </div>
+
+        <div class="missing-skills" id="missingSkills">
+          <!-- Missing skill chips injected by JavaScript -->
+        </div>
+      </section>
+
+      <!-- ============================================================
+         LEARNING ROADMAP SECTION
+         ============================================================ -->
+      <section class="section">
+        <div class="section__head">
+          <h2><span class="section__index">03 /</span> Learning Roadmap</h2>
+          <p>A suggested order to close the gaps above</p>
+        </div>
+
+        <div class="roadmap" id="roadmapList">
+          <!-- Roadmap steps injected by JavaScript -->
+        </div>
+      </section>
+
+      <!-- ============================================================
+         RECOMMENDATIONS SECTION
+         ============================================================ -->
+      <section class="section">
+        <div class="section__head">
+          <h2><span class="section__index">04 /</span> Recommendations</h2>
+          <p>Curated by the recommender system based on your skill gaps</p>
+        </div>
+
+        <div class="rec-grid">
+          <div class="rec-card rec-card--courses">
+            <div class="rec-card__icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2zM22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"
+                ></path>
+              </svg>
+            </div>
+            <h3>Courses</h3>
+            <ul id="recCourses">
+              <li>Loading…</li>
+            </ul>
+          </div>
+
+          <div class="rec-card rec-card--certs">
+            <div class="rec-card__icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="8" r="6"></circle>
+                <path d="M9 14L6 22l6-3 6 3-3-8"></path>
+              </svg>
+            </div>
+            <h3>Certifications</h3>
+            <ul id="recCertificates">
+              <li>Loading…</li>
+            </ul>
+          </div>
+
+          <div class="rec-card rec-card--projects">
+            <div class="rec-card__icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                <path d="M3 9h18M9 21V9"></path>
+              </svg>
+            </div>
+            <h3>Projects to Build</h3>
+            <ul id="recProjects">
+              <li>Loading…</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+         ACTIONS
+         ============================================================ -->
+      <div class="results-actions">
+        <a href="index.html" class="btn btn--ghost">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M19 12H5M12 19l-7-7 7-7"></path>
+          </svg>
+          Run Another Analysis
+        </a>
+        <button class="btn btn--primary" onclick="window.print()">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"
+            ></path>
+          </svg>
+          Save as PDF
+        </button>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      ITCareerGuide AI — University Final Project · Built with HTML, CSS &amp;
+      JavaScript
+    </footer>
+
+    <script>
+      /* ============================================================
+       RESULTS PAGE LOGIC (REAL — connected to KNN, DecisionTree,
+       Recommender, data.js)
+       ------------------------------------------------------------
+       1. Load the profile saved by index.html (redirect back if
+          the user navigated here directly with no profile)
+       2. Render the student summary card
+       3. Run KNN.predict + DecisionTree.classify + Recommender.suggest
+       4. Render career match bars, Decision Tree badge, Chart.js
+          skill gap chart, roadmap, and recommendation cards
+       ============================================================ */
+
+      // ---------- 1. Load profile ----------
+      const profileRaw = sessionStorage.getItem("careerMentorProfile");
+
+      if (!profileRaw) {
+        // No profile found — user must fill the form first
+        window.location.href = "index.html";
+        throw new Error("No profile found, redirecting...");
+      }
+
+      const profile = JSON.parse(profileRaw);
+      // profile = { fullName, skillsRaw, skills[], gpa, interestLabel, interests[] }
+
+      // ---------- 2. Render summary card ----------
+      document.getElementById("summaryName").textContent = profile.fullName;
+      document.getElementById("summarySkills").textContent = profile.skillsRaw;
+      document.getElementById("summaryInterest").textContent =
+        profile.interestLabel;
+      document.getElementById("summaryGpa").textContent =
+        profile.gpa.toFixed(2);
+      document.getElementById("avatarInitial").textContent = profile.fullName
+        .charAt(0)
+        .toUpperCase();
+
+      document.getElementById("reportTimestamp").textContent =
+        "Generated " +
+        new Date().toLocaleString("en-US", {
+          weekday: "short",
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+      // ---------- 3. Run the real AI models ----------
+      // "user" object shape expected by KNN.predict() and DecisionTree.classify()
+      const user = {
+        skills: profile.skills,
+        gpa: profile.gpa,
+        interests: profile.interests,
+      };
+
+      const knnResult = KNN.predict(user, studentProfiles, 3);
+      const dtResult = DecisionTree.classify(user);
+      const recommendations = Recommender.suggest(
+        knnResult.topCareer,
+        profile.skills
+      );
+      const knnSkillGap = KNN.getSkillGap(
+        user,
+        studentProfiles,
+        knnResult.topCareer
+      );
+
+      // Merge missing skills from both KNN skill-gap analysis and the
+      // Recommender's own gap check, removing duplicates
+      const missingSkills = Array.from(
+        new Set([...knnSkillGap, ...recommendations.missingSkills])
+      );
+
+      // ---------- 4a. Decision Tree badge ----------
+      document.getElementById("dtCareer").textContent = dtResult.career;
+      document.getElementById("dtConfidence").textContent = dtResult.confidence
+        ? `(${dtResult.confidence}% confidence, via ${dtResult.resolvedBy})`
+        : "";
+
+      // ---------- 4b. Render career match signal bars (REAL KNN data) ----------
+      function tierFor(score) {
+        if (score >= 70) return "high";
+        if (score >= 45) return "mid";
+        return "low";
+      }
+      function subtitleFor(score, idx) {
+        if (idx === 0) return "Best alignment with your current profile";
+        if (score >= 45) return "Reasonable fit, some skill gaps";
+        return "Lower fit based on current profile";
+      }
+
+      // Show the top 5 careers so the report stays readable
+      const topMatches = knnResult.matches.slice(0, 5).map((m, idx) => ({
+        title: m.career,
+        sub: subtitleFor(m.matchPercent, idx),
+        score: m.matchPercent,
+        tier: tierFor(m.matchPercent),
+      }));
+
+      const matchList = document.getElementById("matchList");
+      matchList.innerHTML = topMatches
+        .map(
+          (match) => `
+      <div class="match-row">
+        <div class="match-row__title">
+          <strong>${match.title}</strong>
+          <span>${match.sub}</span>
+        </div>
+        <div class="signal">
+          ${Array.from({ length: 20 })
+            .map(
+              (_, i) => `
+            <div class="signal__bar">
+              <div class="signal__bar-fill ${match.tier}" data-target="${
+                i < Math.round(match.score / 5) ? 100 : 0
+              }"></div>
+            </div>
+          `
+            )
+            .join("")}
+        </div>
+        <div class="match-row__score">${match.score}%</div>
+      </div>
+    `
+        )
+        .join("");
+
+      // Animate the signal bars in after paint
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          document.querySelectorAll(".signal__bar-fill").forEach((bar) => {
+            bar.style.width = bar.dataset.target + "%";
+          });
+        }, 100);
+      });
+
+      // ---------- 4c. Render missing skill chips (REAL data) ----------
+      const missingSkillsEl = document.getElementById("missingSkills");
+      if (missingSkills.length === 0) {
+        missingSkillsEl.innerHTML =
+          "<p>Great! You already have all the key skills for this career.</p>";
+      } else {
+        missingSkillsEl.innerHTML = missingSkills
+          .map(
+            (skill) => `
+      <div class="missing-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+        ${skill.charAt(0).toUpperCase() + skill.slice(1)}
+      </div>
+    `
+          )
+          .join("");
+      }
+
+      // ---------- 4d. Render learning roadmap (dynamically generated) ----------
+      const roadmapSteps = [];
+
+      if (missingSkills.length > 0) {
+        roadmapSteps.push({
+          title: `Learn ${missingSkills[0].charAt(0).toUpperCase() + missingSkills[0].slice(1)}`,
+          note:
+            recommendations.courses && recommendations.courses[0]
+              ? `Start with: ${recommendations.courses[0]}`
+              : "Close your biggest skill gap first",
+        });
+      }
+      if (recommendations.courses && recommendations.courses.length > 1) {
+        roadmapSteps.push({
+          title: "Complete a Core Course",
+          note: recommendations.courses[1],
+        });
+      }
+      if (recommendations.projects && recommendations.projects[0]) {
+        roadmapSteps.push({
+          title: "Build a Portfolio Project",
+          note: recommendations.projects[0],
+        });
+      }
+      if (recommendations.certificates && recommendations.certificates[0]) {
+        roadmapSteps.push({
+          title: "Earn a Certification",
+          note: recommendations.certificates[0],
+        });
+      }
+      roadmapSteps.push({
+        title: `Apply for ${knnResult.topCareer} Roles`,
+        note: "Use your new skills, projects and certificate in applications",
+      });
+
+      const roadmapList = document.getElementById("roadmapList");
+      roadmapList.innerHTML = roadmapSteps
+        .map(
+          (step, i) => `
+      <div class="roadmap-step">
+        <div class="roadmap-step__marker">${i + 1}</div>
+        <div class="roadmap-step__body">
+          <h3>${step.title}</h3>
+          <p>${step.note}</p>
+        </div>
+      </div>
+    `
+        )
+        .join("");
+
+      // ---------- 4e. Render recommendation cards (REAL data) ----------
+      function fillList(elId, items, fallbackText) {
+        const el = document.getElementById(elId);
+        if (!items || items.length === 0) {
+          el.innerHTML = `<li>${fallbackText}</li>`;
+          return;
+        }
+        el.innerHTML = items.map((item) => `<li>${item}</li>`).join("");
+      }
+      fillList("recCourses", recommendations.courses, "No courses found");
+      fillList(
+        "recCertificates",
+        recommendations.certificates,
+        "No certificates found"
+      );
+      fillList("recProjects", recommendations.projects, "No projects found");
+
+      // ---------- 4f. Skill Gap Chart (Chart.js) — REAL data ----------
+      // Build chart labels from: skills the user has that matter for this
+      // career + the top missing skills, so the chart tells a real story
+      const topCareerSkillSet = new Set(recommendations.requiredSkills || []);
+      missingSkills.forEach((s) => topCareerSkillSet.add(s));
+      const chartLabels = Array.from(topCareerSkillSet).slice(0, 6);
+
+      // "Required level" = % of profiles in this career that have the skill
+      function requiredLevelFor(skill) {
+        const careerProfiles = studentProfiles.filter(
+          (p) => p.career.toLowerCase() === knnResult.topCareer.toLowerCase()
+        );
+        if (careerProfiles.length === 0) return 50;
+        const withSkill = careerProfiles.filter((p) =>
+          p.skills.map((s) => s.toLowerCase()).includes(skill.toLowerCase())
+        ).length;
+        return Math.round((withSkill / careerProfiles.length) * 100);
+      }
+
+      // "Current level" = does the user already claim this skill?
+      function currentLevelFor(skill) {
+        return profile.skills.includes(skill.toLowerCase()) ? 90 : 15;
+      }
+
+      const skillGapData = {
+        labels: chartLabels.map(
+          (s) => s.charAt(0).toUpperCase() + s.slice(1)
+        ),
+        current: chartLabels.map(currentLevelFor),
+        required: chartLabels.map(requiredLevelFor),
+      };
+
+      const ctx = document.getElementById("skillGapChart").getContext("2d");
+      let skillChart;
+
+      function buildChartConfig(type) {
+        const baseDatasets = [
+          {
+            label: "Current Level",
+            data: skillGapData.current,
+            backgroundColor:
+              type === "radar" ? "rgba(37, 99, 235, 0.18)" : "#2563eb",
+            borderColor: "#2563eb",
+            borderWidth: type === "radar" ? 2 : 0,
+            borderRadius: type === "bar" ? 6 : 0,
+            pointBackgroundColor: "#2563eb",
+          },
+          {
+            label: "Required Level",
+            data: skillGapData.required,
+            backgroundColor:
+              type === "radar" ? "rgba(56, 189, 248, 0.15)" : "#38bdf8",
+            borderColor: "#38bdf8",
+            borderWidth: type === "radar" ? 2 : 0,
+            borderRadius: type === "bar" ? 6 : 0,
+            pointBackgroundColor: "#38bdf8",
+          },
+        ];
+
+        const sharedOptions = {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }, // custom legend rendered below the chart
+            tooltip: {
+              backgroundColor: "#0f172a",
+              padding: 10,
+              titleFont: { family: "Inter", weight: "600" },
+              bodyFont: { family: "JetBrains Mono" },
+              cornerRadius: 8,
+            },
+          },
+        };
+
+        if (type === "bar") {
+          return {
+            type: "bar",
+            data: { labels: skillGapData.labels, datasets: baseDatasets },
+            options: {
+              ...sharedOptions,
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  max: 100,
+                  ticks: {
+                    font: { family: "JetBrains Mono", size: 11 },
+                    color: "#64748b",
+                  },
+                  grid: { color: "#edf1f7" },
+                },
+                x: {
+                  ticks: {
+                    font: { family: "Inter", size: 12 },
+                    color: "#0f172a",
+                  },
+                  grid: { display: false },
+                },
+              },
+            },
+          };
+        }
+
+        // Radar configuration
+        return {
+          type: "radar",
+          data: { labels: skillGapData.labels, datasets: baseDatasets },
+          options: {
+            ...sharedOptions,
+            scales: {
+              r: {
+                beginAtZero: true,
+                max: 100,
+                ticks: { display: false },
+                grid: { color: "#e2e8f0" },
+                angleLines: { color: "#e2e8f0" },
+                pointLabels: {
+                  font: { family: "Inter", size: 11 },
+                  color: "#0f172a",
+                },
+              },
+            },
+          },
+        };
+      }
+
+      function renderChart(type) {
+        if (skillChart) skillChart.destroy();
+        skillChart = new Chart(ctx, buildChartConfig(type));
+      }
+
+      renderChart("bar");
+
+      // Toggle between bar / radar views
+      document.querySelectorAll(".chart-toggle-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document
+            .querySelectorAll(".chart-toggle-btn")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          renderChart(btn.dataset.chart);
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ITCareerGuide AI — Smart Career Guidance</title>
+
+    <!-- Google Fonts: Space Grotesk (display), Inter (body), JetBrains Mono (data) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- ============================================================
+       ALGORITHM MODULES — load order matters!
+       data.js must load first (other files use studentProfiles)
+       ============================================================ -->
+    <script src="data.js"></script>
+    <script src="decisionTree.js"></script>
+    <script src="knn.js"></script>
+    <script src="recommender.js"></script>
+  </head>
+  <body>
+    <!-- ============================================================
+       NAVBAR
+       ============================================================ -->
+    <header class="navbar">
+      <div class="navbar__inner">
+        <div class="brand">
+          <div class="brand__mark" style="background:white;border-radius:10px;padding:3px;display:flex;align-items:center;justify-content:center;">
+            <!-- ITCareerGuide AI logo icon -->
+            <img src="logo.png" alt="ITCareerGuide AI Logo" style="width:36px;height:36px;object-fit:contain;object-position:center top;" />
+          </div>
+          <div class="brand__text">
+            <span class="brand__title">ITCareerGuide AI</span>
+            <span class="brand__subtitle"
+              >Smart Career Guidance for University Students</span
+            >
+          </div>
+        </div>
+        <div class="nav__status">
+          <span class="status-dot"></span>
+          <span class="label-text">Model status: ready</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="shell">
+      <!-- ============================================================
+         HERO SECTION
+         ============================================================ -->
+      <section class="hero">
+        <span class="hero__eyebrow"
+          >Decision Tree · KNN · Recommender System</span
+        >
+        <h1 class="hero__title">
+          Find the career path your <em>skills already point to</em>.
+        </h1>
+        <p class="hero__lede">
+          Enter your skills, GPA, and interests below. Our model compares your
+          profile against classified career outcomes and similar student records
+          to generate a personalized match score, skill gap report, and learning
+          roadmap — in seconds.
+        </p>
+
+        <div class="hero__stats">
+          <div class="hero__stat">
+            <span class="hero__stat-value">3</span>
+            <span class="hero__stat-label">AI models combined</span>
+          </div>
+          <div class="hero__stat">
+            <span class="hero__stat-value">12+</span>
+            <span class="hero__stat-label">Career paths classified</span>
+          </div>
+          <div class="hero__stat">
+            <span class="hero__stat-value">&lt;5s</span>
+            <span class="hero__stat-label">Analysis time</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+         HOW IT WORKS — pipeline strip
+         ============================================================ -->
+      <section class="process">
+        <div class="process__step">
+          <div class="process__index">01</div>
+          <div>
+            <h3>Submit your profile</h3>
+            <p>Skills, GPA, and interests are vectorized as model input.</p>
+          </div>
+        </div>
+        <div class="process__step">
+          <div class="process__index">02</div>
+          <div>
+            <h3>Model scores it</h3>
+            <p>Decision Tree classifies careers; KNN finds similar profiles.</p>
+          </div>
+        </div>
+        <div class="process__step">
+          <div class="process__index">03</div>
+          <div>
+            <h3>Get your roadmap</h3>
+            <p>A recommender system maps the gaps to courses and projects.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+         INPUT FORM CARD
+         ============================================================ -->
+      <section class="form-section">
+        <div class="panel">
+          <div class="panel__header">
+            <h2>Build your profile</h2>
+            <p>
+              All fields are required so the model has enough signal to work
+              with.
+            </p>
+          </div>
+
+          <form id="careerForm" class="form" novalidate>
+            <!-- Full Name -->
+            <div class="field field--full" data-field="fullName">
+              <label for="fullName">Full Name</label>
+              <input
+                type="text"
+                id="fullName"
+                name="fullName"
+                placeholder="e.g. Aiman Hidayat"
+                required
+              />
+              <span class="field__error">Please enter your full name.</span>
+            </div>
+
+            <!-- Skills -->
+            <div class="field field--full" data-field="skills">
+              <label for="skills">
+                Skills
+                <span class="hint">— comma-separated</span>
+              </label>
+              <textarea
+                id="skills"
+                name="skills"
+                placeholder="e.g. Python, Java, SQL, HTML/CSS"
+                required
+              ></textarea>
+              <span class="field__error">Please list at least one skill.</span>
+            </div>
+
+            <!-- GPA -->
+            <div class="field field--gpa" data-field="gpa">
+              <label for="gpa">
+                GPA
+                <span class="hint">— scale of 4.00</span>
+              </label>
+              <input
+                type="number"
+                id="gpa"
+                name="gpa"
+                placeholder="e.g. 3.45"
+                min="0"
+                max="4"
+                step="0.01"
+                required
+              />
+              <span class="field__error"
+                >GPA must be a number between 0.00 and 4.00.</span
+              >
+            </div>
+
+            <!-- Interests (text input, supplemented by quick-select tags) -->
+            <div class="field" data-field="interests">
+              <label for="interests">
+                Primary Interest
+                <span class="hint">— choose closest match</span>
+              </label>
+              <select id="interests" name="interests" required>
+                <option value="" disabled selected>
+                  Select an interest area
+                </option>
+                <option value="Artificial Intelligence">
+                  Artificial Intelligence
+                </option>
+                <option value="Web Development">Web Development</option>
+                <option value="Cybersecurity">Cybersecurity</option>
+                <option value="Data Science">Data Science</option>
+                <option value="Cloud Computing">Cloud Computing</option>
+                <option value="Mobile Development">Mobile Development</option>
+              </select>
+              <span class="field__error">Please select an interest area.</span>
+            </div>
+
+            <!-- Quick-select interest tags for visual flair + faster input -->
+            <div class="interest-tags" id="interestTags">
+              <button
+                type="button"
+                class="tag-option"
+                data-value="Artificial Intelligence"
+              >
+                AI
+              </button>
+              <button
+                type="button"
+                class="tag-option"
+                data-value="Web Development"
+              >
+                Web Dev
+              </button>
+              <button
+                type="button"
+                class="tag-option"
+                data-value="Cybersecurity"
+              >
+                Cybersecurity
+              </button>
+              <button
+                type="button"
+                class="tag-option"
+                data-value="Data Science"
+              >
+                Data Science
+              </button>
+              <button
+                type="button"
+                class="tag-option"
+                data-value="Cloud Computing"
+              >
+                Cloud Computing
+              </button>
+              <button
+                type="button"
+                class="tag-option"
+                data-value="Mobile Development"
+              >
+                Mobile Dev
+              </button>
+            </div>
+
+            <div class="form__footer">
+              <span class="form__note">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M12 16v-4M12 8h.01"></path>
+                </svg>
+                Your data stays on this device — nothing is sent to a server.
+              </span>
+              <button type="submit" class="btn btn--primary">
+                Analyze Career Path
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M5 12h14M12 5l7 7-7 7"></path>
+                </svg>
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      ITCareerGuide AI — University Final Project · Built with HTML, CSS &amp;
+      JavaScript
+    </footer>
+
+    <script>
+      /* ============================================================
+       INPUT PAGE LOGIC
+       - Validates the form (required fields, GPA range)
+       - Syncs quick-select tags with the interest dropdown
+       - Stores the profile in localStorage and redirects to results.html
+       ============================================================ */
+
+      const form = document.getElementById("careerForm");
+      const interestSelect = document.getElementById("interests");
+      const tagButtons = document.querySelectorAll(".tag-option");
+
+      // Clicking a quick-select tag sets the dropdown value and highlights the tag
+      tagButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          tagButtons.forEach((b) => b.classList.remove("selected"));
+          btn.classList.add("selected");
+          interestSelect.value = btn.dataset.value;
+          clearFieldError("interests");
+        });
+      });
+
+      // Keep tags in sync if the user picks directly from the dropdown
+      interestSelect.addEventListener("change", () => {
+        tagButtons.forEach((b) => {
+          b.classList.toggle(
+            "selected",
+            b.dataset.value === interestSelect.value
+          );
+        });
+      });
+
+      function setFieldError(fieldName, hasError) {
+        const fieldEl = document.querySelector(`[data-field="${fieldName}"]`);
+        if (fieldEl) fieldEl.classList.toggle("invalid", hasError);
+      }
+
+      function clearFieldError(fieldName) {
+        setFieldError(fieldName, false);
+      }
+
+      // Validate all fields; returns true if the form is valid
+      function validateForm(data) {
+        let isValid = true;
+
+        if (!data.fullName.trim()) {
+          setFieldError("fullName", true);
+          isValid = false;
+        } else {
+          setFieldError("fullName", false);
+        }
+
+        if (!data.skills.trim()) {
+          setFieldError("skills", true);
+          isValid = false;
+        } else {
+          setFieldError("skills", false);
+        }
+
+        const gpaValue = parseFloat(data.gpa);
+        if (isNaN(gpaValue) || gpaValue < 0 || gpaValue > 4) {
+          setFieldError("gpa", true);
+          isValid = false;
+        } else {
+          setFieldError("gpa", false);
+        }
+
+        if (!data.interests) {
+          setFieldError("interests", true);
+          isValid = false;
+        } else {
+          setFieldError("interests", false);
+        }
+
+        return isValid;
+      }
+
+      // Maps the dropdown's display labels to the exact interest
+      // strings used inside data.js (lowercase, sometimes worded
+      // differently — e.g. "Mobile Development" -> "mobile apps")
+      const INTEREST_MAP = {
+        "Artificial Intelligence": "artificial intelligence",
+        "Web Development": "web development",
+        "Cybersecurity": "cybersecurity",
+        "Data Science": "data science",
+        "Cloud Computing": "cloud computing",
+        "Mobile Development": "mobile apps",
+      };
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const formData = {
+          fullName: form.fullName.value,
+          skills: form.skills.value,
+          gpa: form.gpa.value,
+          interests: form.interests.value,
+        };
+
+        if (!validateForm(formData)) {
+          return; // stop here — errors are shown inline
+        }
+
+        // Parse the comma-separated skills textarea into a clean array
+        // e.g. "Python, SQL,  HTML/CSS" -> ["python", "sql", "html/css"]
+        const skillsArray = formData.skills
+          .split(",")
+          .map((s) => s.trim().toLowerCase())
+          .filter((s) => s.length > 0);
+
+        const interestLabel = formData.interests; // original label, for display
+        const interestValue =
+          INTEREST_MAP[interestLabel] || interestLabel.toLowerCase();
+
+        // Persist the structured profile so results.html can run
+        // KNN, Decision Tree and the Recommender on it
+        sessionStorage.setItem(
+          "careerMentorProfile",
+          JSON.stringify({
+            fullName: formData.fullName.trim(),
+            skillsRaw: formData.skills.trim(),   // original text, for display
+            skills: skillsArray,                  // parsed array, for algorithms
+            gpa: parseFloat(formData.gpa),
+            interestLabel: interestLabel,         // original label, for display
+            interests: [interestValue],           // array, for algorithms
+          })
+        );
+
+        window.location.href = "results.html";
+      });
+    </script>
+  </body>
+</html>

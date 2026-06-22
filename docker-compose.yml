@@ -1,0 +1,37 @@
+# ============================================================
+#  ITCareerGuide AI — Docker Compose
+#  Usage:
+#    Start:  docker compose up --build
+#    Stop:   docker compose down
+#    Detach: docker compose up -d --build
+# ============================================================
+
+version: "3.9"
+
+services:
+  itcareerguide-ai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: itcareerguide-ai:latest
+    container_name: itcareerguide-ai
+    restart: unless-stopped
+
+    ports:
+      # Host port 8080 → container port 80
+      # Access the app at: http://localhost:8080
+      - "8080:80"
+
+    environment:
+      - TZ=UTC
+
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    labels:
+      com.itcareerguide.description: "ITCareerGuide AI — Smart Career Guidance"
+      com.itcareerguide.version: "1.0.0"
