@@ -32,8 +32,8 @@ function makeFakeDom() {
 
   const ids = [
     "summaryName", "summarySkills", "summaryInterest", "summaryGpa",
-    "avatarInitial", "reportTimestamp", "dtCareer", "dtConfidence",
-    "matchList", "missingSkills", "roadmapList", "recCourses",
+    "avatarInitial", "reportTimestamp", "topMatchCareer", "topMatchScore",
+    "dtAgreement", "matchList", "missingSkills", "roadmapList", "recCourses",
     "recCertificates", "recProjects", "skillGapChart",
   ];
   ids.forEach((id) => (elements[id] = makeEl()));
@@ -84,19 +84,19 @@ function runResultsScriptFor(profile) {
 }
 
 const testProfiles = [
-  { fullName: "Aiman", skillsRaw: "python, sql, tensorflow", skills: ["python", "sql", "tensorflow"], gpa: 3.8, interestLabel: "Artificial Intelligence", interests: ["artificial intelligence"] },
-  { fullName: "Mei", skillsRaw: "flutter, java", skills: ["flutter", "java"], gpa: 3.1, interestLabel: "Mobile Development", interests: ["mobile apps"] },
-  { fullName: "Ravi", skillsRaw: "html, css, react", skills: ["html", "css", "react"], gpa: 3.0, interestLabel: "Web Development", interests: ["web development"] },
-  { fullName: "Sofia", skillsRaw: "unity, c#", skills: ["unity", "c#"], gpa: 3.2, interestLabel: "Game Development", interests: ["game development"] },
-  { fullName: "Daniel", skillsRaw: "arduino, c", skills: ["arduino", "c"], gpa: 3.4, interestLabel: "Embedded Systems", interests: ["embedded systems"] },
+  { fullName: "Aiman", skillsDisplay: ["Python", "SQL", "TensorFlow"], skills: ["python", "sql", "tensorflow"], gpa: 3.8, interestsDisplay: ["Artificial Intelligence"], interests: ["artificial intelligence"] },
+  { fullName: "Mei", skillsDisplay: ["Flutter", "Java"], skills: ["flutter", "java"], gpa: 3.1, interestsDisplay: ["Mobile Apps"], interests: ["mobile apps"] },
+  { fullName: "Ravi", skillsDisplay: ["HTML", "CSS", "React"], skills: ["html", "css", "react"], gpa: 3.0, interestsDisplay: ["Web Development"], interests: ["web development"] },
+  { fullName: "Sofia", skillsDisplay: ["Unity", "C#"], skills: ["unity", "c#"], gpa: 3.2, interestsDisplay: ["Game Development"], interests: ["game development"] },
+  { fullName: "Daniel", skillsDisplay: ["Arduino", "C"], skills: ["arduino", "c"], gpa: 3.4, interestsDisplay: ["Embedded Systems"], interests: ["embedded systems"] },
 
-  // ⚠️ NEW — multi-select interest profiles (previously only 1 interest was possible)
-  { fullName: "Nadia", skillsRaw: "python, sql", skills: ["python", "sql"], gpa: 3.6, interestLabel: "Artificial Intelligence, Data Science", interests: ["artificial intelligence", "data science"] },
-  { fullName: "Faiz", skillsRaw: "html, css, javascript, figma", skills: ["html", "css", "javascript", "figma"], gpa: 3.0, interestLabel: "Web Development, Design, Mobile Development", interests: ["web development", "design", "mobile apps"] },
+  // ⚠️ multi-select interest profiles
+  { fullName: "Nadia", skillsDisplay: ["Python", "SQL"], skills: ["python", "sql"], gpa: 3.6, interestsDisplay: ["Artificial Intelligence", "Data Science"], interests: ["artificial intelligence", "data science"] },
+  { fullName: "Faiz", skillsDisplay: ["HTML", "CSS", "JavaScript", "Figma"], skills: ["html", "css", "javascript", "figma"], gpa: 3.0, interestsDisplay: ["Web Development", "Design", "Mobile Apps"], interests: ["web development", "design", "mobile apps"] },
 ];
 
 testProfiles.forEach((profile) => {
-  test(`results.html inline script runs end-to-end for ${profile.fullName} (${profile.interestLabel}) without throwing`, () => {
+  test(`results.html inline script runs end-to-end for ${profile.fullName} (${profile.interestsDisplay.join(", ")}) without throwing`, () => {
     let sandbox;
     assert.doesNotThrow(() => {
       sandbox = runResultsScriptFor(profile);
@@ -104,9 +104,14 @@ testProfiles.forEach((profile) => {
 
     // Confirm the summary card was actually populated
     assert.equal(sandbox.document.getElementById("summaryName").textContent, profile.fullName);
-    // Confirm a Decision Tree career was written (not stuck on placeholder "—")
-    assert.notEqual(sandbox.document.getElementById("dtCareer").textContent, "—");
+    // Confirm the Top Match hero was populated (not stuck on placeholder "—")
+    assert.notEqual(sandbox.document.getElementById("topMatchCareer").textContent, "—");
+    assert.notEqual(sandbox.document.getElementById("topMatchScore").textContent, "—");
+    // Confirm the Decision Tree agreement note was written
+    assert.ok(sandbox.document.getElementById("dtAgreement").innerHTML.length > 0);
     // Confirm the match list HTML was generated (not empty)
     assert.ok(sandbox.document.getElementById("matchList").innerHTML.length > 0);
+    // Confirm the winning row is visually marked as the top match
+    assert.ok(sandbox.document.getElementById("matchList").innerHTML.includes("match-row--top"));
   });
 });

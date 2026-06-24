@@ -1,5 +1,5 @@
 /* ============================================================
-   AI CAREER MENTOR — STYLESHEET (Premium Dark Mode Edition)
+   ITCAREERGUIDE AI — STYLESHEET (Premium Dark Mode Edition)
    ------------------------------------------------------------
    Design direction: obsidian/slate dark base, electric-blue +
    cyber-cyan + emerald accent system, Linear-style moderate
@@ -536,9 +536,10 @@ textarea:focus-visible {
   font-size: 0.76rem;
 }
 
-.field input:not([type="checkbox"]),
+.field input,
 .field select,
 .field textarea {
+  width: 100%;
   font-family: var(--font-body);
   font-size: 0.94rem;
   padding: 12px 14px;
@@ -569,13 +570,13 @@ textarea:focus-visible {
   color: var(--ink);
 }
 
-.field input:not([type="checkbox"]):hover,
+.field input:hover,
 .field select:hover,
 .field textarea:hover {
   border-color: var(--border-hairline-strong);
 }
 
-.field input:not([type="checkbox"]):focus,
+.field input:focus,
 .field select:focus,
 .field textarea:focus {
   border-color: var(--primary);
@@ -612,6 +613,160 @@ textarea:focus-visible {
   display: block;
 }
 
+/* ============================================================
+   SKILLS — searchable multi-select combobox
+   Replaces the old free-text textarea. A type-to-filter input
+   opens a glass dropdown list of checkable skills; chosen skills
+   render as removable chips above the input, reusing the same
+   chip language as the interest tags for visual consistency.
+   ============================================================ */
+.combobox {
+  position: relative;
+}
+
+.combobox__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.combobox__chips:empty {
+  display: none;
+}
+
+.skill-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 6px 8px 6px 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  border: 1px solid var(--primary-bright);
+  color: #fff;
+  box-shadow: var(--glow-primary);
+}
+
+.skill-chip__remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  border: none;
+  color: #fff;
+  font-size: 0.7rem;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.skill-chip__remove:hover {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+.combobox__input-wrap {
+  position: relative;
+}
+
+.combobox__input-wrap svg {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--muted-dim);
+  pointer-events: none;
+}
+
+.combobox input[type="text"] {
+  padding-left: 38px;
+}
+
+.combobox__panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  max-height: 248px;
+  overflow-y: auto;
+  background: var(--surface-1);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  border: 1px solid var(--border-hairline-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card-hover);
+  padding: 6px;
+  display: none;
+}
+
+.combobox__panel.open {
+  display: block;
+}
+
+.combobox__option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  font-size: 0.86rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.combobox__option:hover,
+.combobox__option.highlighted {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.combobox__option-check {
+  width: 16px;
+  height: 16px;
+  border-radius: 5px;
+  border: 1.5px solid var(--border-hairline-strong);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.combobox__option.selected .combobox__option-check {
+  background: var(--primary);
+  border-color: var(--primary-bright);
+}
+
+.combobox__option.selected .combobox__option-check svg {
+  width: 11px;
+  height: 11px;
+  color: #fff;
+}
+
+.combobox__option.selected {
+  color: var(--ink);
+}
+
+.combobox__empty {
+  padding: 14px 10px;
+  font-size: 0.82rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.field--skills .hint.count,
+.field--interests .hint.count {
+  color: var(--accent-bright);
+  font-weight: 600;
+}
+
 .interest-tags {
   display: flex;
   flex-wrap: wrap;
@@ -620,7 +775,6 @@ textarea:focus-visible {
 }
 
 .tag-option {
-  position: relative;
   font-size: 0.82rem;
   padding: 8px 14px;
   border-radius: 999px;
@@ -628,23 +782,6 @@ textarea:focus-visible {
   background: rgba(255, 255, 255, 0.03);
   color: var(--muted);
   transition: all 0.25s ease;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  user-select: none;
-}
-
-/* Hide the native checkbox visually but keep it accessible
-   (still focusable/clickable via the wrapping <label>) */
-.tag-option input[type="checkbox"] {
-  appearance: none;
-  -webkit-appearance: none;
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-  margin: 0;
-  pointer-events: none;
 }
 
 .tag-option:hover {
@@ -655,20 +792,11 @@ textarea:focus-visible {
   transform: translateY(-1px);
 }
 
-/* Selected state — driven by the checkbox's :checked state.
-   Works with both the live CSS :has() check AND the JS
-   "selected" class fallback for older browsers. */
-.tag-option.selected,
-.tag-option:has(input:checked) {
+.tag-option.selected {
   background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   border-color: var(--primary-bright);
   color: #fff;
   box-shadow: var(--glow-primary);
-}
-
-.tag-option:focus-within {
-  outline: 2px solid var(--primary-bright);
-  outline-offset: 2px;
 }
 
 .form__footer {
@@ -982,6 +1110,103 @@ textarea:focus-visible {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
   padding: 8px;
+}
+
+/* ============================================================
+   TOP MATCH HERO — emphasizes the #1 career result clearly,
+   separate from the ranked list, so it can never get visually
+   lost among near-identical percentages (10+ careers means even
+   a clear winner often scores in the 30s).
+   ============================================================ */
+.top-match {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  background: linear-gradient(135deg,
+      rgba(16, 185, 129, 0.14),
+      rgba(6, 182, 212, 0.08));
+  border: 1.5px solid rgba(16, 185, 129, 0.35);
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  margin-bottom: 18px;
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.08) inset,
+    0 8px 30px rgba(16, 185, 129, 0.12);
+}
+
+.top-match__left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.top-match__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--success-bright);
+  text-transform: uppercase;
+}
+
+.top-match__career {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+}
+
+.top-match__agreement {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.top-match__agreement--agree strong,
+.top-match__agreement--agree {
+  color: var(--success-bright);
+}
+
+.top-match__agreement--disagree strong {
+  color: var(--warning);
+}
+
+.top-match__score-ring {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: var(--surface-1);
+  border: 3px solid var(--success);
+  box-shadow: 0 0 24px rgba(16, 185, 129, 0.45);
+}
+
+.top-match__score-value {
+  font-family: var(--font-mono);
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--success-bright);
+}
+
+.top-match__score-unit {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  color: var(--success-bright);
+  margin-left: 2px;
+}
+
+/* Highlights the winning row inside the ranked list too,
+   so the #1 result stands out even when scrolling past the hero */
+.match-row--top {
+  background: rgba(16, 185, 129, 0.06);
+  border-radius: var(--radius-md);
+}
+
+.match-row__crown {
+  font-size: 0.85rem;
 }
 
 .match-row {
@@ -1349,6 +1574,11 @@ textarea:focus-visible {
 .roadmap-step:nth-child(4) .roadmap-step__marker {
   background: linear-gradient(135deg, var(--success-bright), var(--success));
   box-shadow: var(--glow-success);
+}
+
+.roadmap-step:nth-child(5) .roadmap-step__marker {
+  background: linear-gradient(135deg, var(--accent-bright), var(--accent));
+  box-shadow: var(--glow-accent);
 }
 
 .roadmap-step__body {

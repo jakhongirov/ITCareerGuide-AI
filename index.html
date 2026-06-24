@@ -30,9 +30,21 @@
     <header class="navbar">
       <div class="navbar__inner">
         <div class="brand">
-          <div class="brand__mark" style="background:white;border-radius:10px;padding:3px;display:flex;align-items:center;justify-content:center;">
-            <!-- ITCareerGuide AI logo icon -->
-            <img src="logo.png" alt="ITCareerGuide AI Logo" style="width:36px;height:36px;object-fit:contain;object-position:center top;" />
+          <div class="brand__mark">
+            <!-- compass / target icon representing career direction -->
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="9"></circle>
+              <path
+                d="M12 7l1.5 3.5L17 12l-3.5 1.5L12 17l-1.5-3.5L7 12l3.5-1.5L12 7z"
+              ></path>
+            </svg>
           </div>
           <div class="brand__text">
             <span class="brand__title">ITCareerGuide AI</span>
@@ -137,18 +149,31 @@
             </div>
 
             <!-- Skills -->
-            <div class="field field--full" data-field="skills">
-              <label for="skills">
+            <div class="field field--full field--skills combobox" data-field="skills">
+              <label for="skillsInput">
                 Skills
-                <span class="hint">— comma-separated</span>
+                <span class="hint" id="skillsCount">— choose all that apply</span>
               </label>
-              <textarea
-                id="skills"
-                name="skills"
-                placeholder="e.g. Python, Java, SQL, HTML/CSS"
-                required
-              ></textarea>
-              <span class="field__error">Please list at least one skill.</span>
+
+              <!-- Selected skills render here as removable chips -->
+              <div class="combobox__chips" id="skillsChips"></div>
+
+              <div class="combobox__input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path></svg>
+                <input
+                  type="text"
+                  id="skillsInput"
+                  placeholder="Search skills — e.g. Python, SQL, React..."
+                  autocomplete="off"
+                />
+              </div>
+
+              <!-- Dropdown list of checkable skill options, filtered as the user types -->
+              <div class="combobox__panel" id="skillsPanel" role="listbox"></div>
+
+              <!-- Hidden input so the selected skills are easy to read on submit -->
+              <input type="hidden" id="skills" name="skills" />
+              <span class="field__error">Please select at least one skill.</span>
             </div>
 
             <!-- GPA -->
@@ -172,59 +197,32 @@
               >
             </div>
 
-            <!-- Interests — multi-select checkboxes -->
-            <div class="field" data-field="interests">
+            <!-- Interests — multi-select pill grid, choose one or more -->
+            <div class="field field--full field--interests" data-field="interests">
               <label for="interestTags">
                 Interests
-                <span class="hint">— select all that apply</span>
+                <span class="hint" id="interestsCount">— choose all that apply</span>
               </label>
 
-              <!-- Real checkboxes (accessible, keyboard-friendly).
-                   Visually styled as pills via CSS below. -->
-              <div class="interest-tags" id="interestTags">
-                <label class="tag-option">
-                  <input type="checkbox" name="interests" value="Artificial Intelligence" />
-                  <span>AI</span>
-                </label>
-                <label class="tag-option">
-                  <input type="checkbox" name="interests" value="Web Development" />
-                  <span>Web Dev</span>
-                </label>
-                <label class="tag-option">
-                  <input type="checkbox" name="interests" value="Cybersecurity" />
-                  <span>Cybersecurity</span>
-                </label>
-                <label class="tag-option">
-                  <input type="checkbox" name="interests" value="Data Science" />
-                  <span>Data Science</span>
-                </label>
-                <label class="tag-option">
-                  <input type="checkbox" name="interests" value="Cloud Computing" />
-                  <span>Cloud Computing</span>
-                </label>
-                <label class="tag-option">
-                  <input type="checkbox" name="interests" value="Mobile Development" />
-                  <span>Mobile Dev</span>
-                </label>
-                <label class="tag-option">
-                  <input type="checkbox" name="interests" value="Game Development" />
-                  <span>Game Dev</span>
-                </label>
-                <label class="tag-option">
-                  <input type="checkbox" name="interests" value="Embedded Systems" />
-                  <span>Embedded Systems</span>
-                </label>
-                <label class="tag-option">
-                  <input type="checkbox" name="interests" value="Design" />
-                  <span>Design</span>
-                </label>
-                <label class="tag-option">
-                  <input type="checkbox" name="interests" value="Databases" />
-                  <span>Databases</span>
-                </label>
-              </div>
+              <!-- Hidden input keeps the selected interests in the form data on submit -->
+              <input type="hidden" id="interests" name="interests" />
 
-              <span class="field__error">Please select at least one interest area.</span>
+              <div class="interest-tags" id="interestTags">
+                <button type="button" class="tag-option" data-value="Web Development">Web Development</button>
+                <button type="button" class="tag-option" data-value="Cloud Computing">Cloud Computing</button>
+                <button type="button" class="tag-option" data-value="Databases">Databases</button>
+                <button type="button" class="tag-option" data-value="Artificial Intelligence">Artificial Intelligence</button>
+                <button type="button" class="tag-option" data-value="Data Science">Data Science</button>
+                <button type="button" class="tag-option" data-value="Design">Design</button>
+                <button type="button" class="tag-option" data-value="Cybersecurity">Cybersecurity</button>
+                <button type="button" class="tag-option" data-value="Networking">Networking</button>
+                <button type="button" class="tag-option" data-value="Mobile Apps">Mobile Apps</button>
+                <button type="button" class="tag-option" data-value="Game Development">Game Development</button>
+                <button type="button" class="tag-option" data-value="Embedded Systems">Embedded Systems</button>
+                <button type="button" class="tag-option" data-value="IoT">IoT</button>
+                <button type="button" class="tag-option" data-value="Hardware">Hardware</button>
+              </div>
+              <span class="field__error">Please select at least one interest.</span>
             </div>
 
             <div class="form__footer">
@@ -270,25 +268,40 @@
       /* ============================================================
        INPUT PAGE LOGIC
        - Validates the form (required fields, GPA range)
-       - Interests are now MULTI-SELECT checkboxes (was single-select)
-       - Stores the profile in sessionStorage and redirects to results.html
+       - Syncs quick-select tags with the interest dropdown
+       - Stores the profile in localStorage and redirects to results.html
        ============================================================ */
 
       const form = document.getElementById("careerForm");
-      const interestCheckboxes = document.querySelectorAll(
-        'input[name="interests"]'
-      );
+      const tagButtons = document.querySelectorAll(".tag-option");
+      const interestsHidden = document.getElementById("interests");
+      const interestsCountEl = document.getElementById("interestsCount");
 
-      // Keep the pill's "selected" look in sync with its checkbox.
-      // (Also handled by CSS :has(), this is a JS fallback +
-      // makes the visual update feel instant on click)
-      interestCheckboxes.forEach((checkbox) => {
-        checkbox.addEventListener("change", () => {
-          checkbox.closest(".tag-option").classList.toggle(
-            "selected",
-            checkbox.checked
-          );
-          if (checkbox.checked) clearFieldError("interests");
+      // Tracks every interest the student has toggled on (multi-select)
+      const selectedInterests = new Set();
+
+      function syncInterestsHidden() {
+        interestsHidden.value = JSON.stringify(Array.from(selectedInterests));
+        interestsCountEl.textContent =
+          selectedInterests.size > 0
+            ? `— ${selectedInterests.size} selected`
+            : "— choose all that apply";
+        interestsCountEl.classList.toggle("count", selectedInterests.size > 0);
+      }
+
+      // Clicking an interest pill toggles it on/off — multiple may be selected
+      tagButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const value = btn.dataset.value;
+          if (selectedInterests.has(value)) {
+            selectedInterests.delete(value);
+            btn.classList.remove("selected");
+          } else {
+            selectedInterests.add(value);
+            btn.classList.add("selected");
+          }
+          syncInterestsHidden();
+          clearFieldError("interests");
         });
       });
 
@@ -301,6 +314,120 @@
         setFieldError(fieldName, false);
       }
 
+      // ============================================================
+      // SKILLS — searchable multi-select combobox
+      // ============================================================
+      const SKILLS_LIST = [
+        "C", "C#", "C++", "Assembly", "Embedded C", "Arduino", "RTOS",
+        "Unity", "Unreal", "Python", "Java", "JavaScript", "Node.js",
+        "Flutter", "HTML", "CSS", "React", "Figma", "SQL", "MongoDB",
+        "Git", "Linux", "Networking", "Cybersecurity", "Machine Learning",
+        "TensorFlow", "Data Analysis",
+      ];
+
+      const skillsInput = document.getElementById("skillsInput");
+      const skillsPanel = document.getElementById("skillsPanel");
+      const skillsChips = document.getElementById("skillsChips");
+      const skillsHidden = document.getElementById("skills");
+      const skillsCountEl = document.getElementById("skillsCount");
+
+      // Tracks every skill the student has selected (multi-select)
+      const selectedSkills = new Set();
+
+      const checkIconSvg =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+
+      function renderSkillsPanel(filterText = "") {
+        const query = filterText.trim().toLowerCase();
+        const matches = SKILLS_LIST.filter((skill) =>
+          skill.toLowerCase().includes(query)
+        );
+
+        if (matches.length === 0) {
+          skillsPanel.innerHTML = '<div class="combobox__empty">No matching skills</div>';
+          return;
+        }
+
+        skillsPanel.innerHTML = matches
+          .map((skill) => {
+            const isSelected = selectedSkills.has(skill);
+            return `
+              <div class="combobox__option ${isSelected ? "selected" : ""}" data-value="${skill}" role="option">
+                <span class="combobox__option-check">${isSelected ? checkIconSvg : ""}</span>
+                <span>${skill}</span>
+              </div>
+            `;
+          })
+          .join("");
+      }
+
+      function renderSkillsChips() {
+        skillsChips.innerHTML = Array.from(selectedSkills)
+          .map(
+            (skill) => `
+              <span class="skill-chip" data-value="${skill}">
+                ${skill}
+                <button type="button" class="skill-chip__remove" data-remove="${skill}" aria-label="Remove ${skill}">✕</button>
+              </span>
+            `
+          )
+          .join("");
+
+        skillsHidden.value = JSON.stringify(Array.from(selectedSkills));
+        skillsCountEl.textContent =
+          selectedSkills.size > 0
+            ? `— ${selectedSkills.size} selected`
+            : "— choose all that apply";
+        skillsCountEl.classList.toggle("count", selectedSkills.size > 0);
+      }
+
+      function toggleSkill(skill) {
+        if (selectedSkills.has(skill)) {
+          selectedSkills.delete(skill);
+        } else {
+          selectedSkills.add(skill);
+        }
+        renderSkillsChips();
+        renderSkillsPanel(skillsInput.value);
+        clearFieldError("skills");
+      }
+
+      function openSkillsPanel() {
+        renderSkillsPanel(skillsInput.value);
+        skillsPanel.classList.add("open");
+      }
+
+      function closeSkillsPanel() {
+        skillsPanel.classList.remove("open");
+      }
+
+      skillsInput.addEventListener("focus", openSkillsPanel);
+      skillsInput.addEventListener("input", () => {
+        openSkillsPanel();
+      });
+
+      // Clicking an option in the dropdown toggles that skill
+      skillsPanel.addEventListener("click", (event) => {
+        const option = event.target.closest(".combobox__option");
+        if (!option) return;
+        toggleSkill(option.dataset.value);
+        skillsInput.focus();
+      });
+
+      // Clicking the ✕ on a chip removes that skill
+      skillsChips.addEventListener("click", (event) => {
+        const removeBtn = event.target.closest("[data-remove]");
+        if (!removeBtn) return;
+        toggleSkill(removeBtn.dataset.remove);
+      });
+
+      // Close the dropdown when clicking anywhere outside the combobox
+      document.addEventListener("click", (event) => {
+        if (!event.target.closest(".field--skills")) {
+          closeSkillsPanel();
+        }
+      });
+
       // Validate all fields; returns true if the form is valid
       function validateForm(data) {
         let isValid = true;
@@ -312,7 +439,7 @@
           setFieldError("fullName", false);
         }
 
-        if (!data.skills.trim()) {
+        if (selectedSkills.size === 0) {
           setFieldError("skills", true);
           isValid = false;
         } else {
@@ -327,8 +454,7 @@
           setFieldError("gpa", false);
         }
 
-        // Now checks that AT LEAST ONE interest checkbox is selected
-        if (!data.interests || data.interests.length === 0) {
+        if (selectedInterests.size === 0) {
           setFieldError("interests", true);
           isValid = false;
         } else {
@@ -338,64 +464,41 @@
         return isValid;
       }
 
-      // Maps each checkbox's display label to the exact interest
-      // string used inside data.js (lowercase, sometimes worded
-      // differently — e.g. "Mobile Development" -> "mobile apps")
-      const INTEREST_MAP = {
-        "Artificial Intelligence": "artificial intelligence",
-        "Web Development": "web development",
-        "Cybersecurity": "cybersecurity",
-        "Data Science": "data science",
-        "Cloud Computing": "cloud computing",
-        "Mobile Development": "mobile apps",
-        "Game Development": "game development",
-        "Embedded Systems": "embedded systems",
-        "Design": "design",
-        "Databases": "databases",
-      };
+      // Converts a skill label like "Node.js" into the lowercase,
+      // punctuation-free form used inside data.js ("nodejs")
+      function normalizeSkill(skill) {
+        return skill.toLowerCase().replace(/\./g, "").trim();
+      }
 
       form.addEventListener("submit", (event) => {
         event.preventDefault();
 
-        // Collect every CHECKED interest checkbox (multi-select)
-        const selectedInterestLabels = Array.from(interestCheckboxes)
-          .filter((cb) => cb.checked)
-          .map((cb) => cb.value);
-
         const formData = {
           fullName: form.fullName.value,
-          skills: form.skills.value,
           gpa: form.gpa.value,
-          interests: selectedInterestLabels, // now an array, not a single string
         };
 
         if (!validateForm(formData)) {
           return; // stop here — errors are shown inline
         }
 
-        // Parse the comma-separated skills textarea into a clean array
-        // e.g. "Python, SQL,  HTML/CSS" -> ["python", "sql", "html/css"]
-        const skillsArray = formData.skills
-          .split(",")
-          .map((s) => s.trim().toLowerCase())
-          .filter((s) => s.length > 0);
-
-        // Map every selected label to data.js's interest vocabulary
-        const interestValues = formData.interests.map(
-          (label) => INTEREST_MAP[label] || label.toLowerCase()
-        );
+        const skillsDisplay = Array.from(selectedSkills);     // e.g. ["Python", "SQL"]
+        const interestsDisplay = Array.from(selectedInterests); // e.g. ["Web Development"]
 
         // Persist the structured profile so results.html can run
-        // KNN, Decision Tree and the Recommender on it
+        // KNN, Decision Tree and the Recommender on it. Both a
+        // "display" version (original casing, for the summary card)
+        // and a normalized version (lowercase, for the algorithms)
+        // are stored.
         sessionStorage.setItem(
           "careerMentorProfile",
           JSON.stringify({
             fullName: formData.fullName.trim(),
-            skillsRaw: formData.skills.trim(),     // original text, for display
-            skills: skillsArray,                    // parsed array, for algorithms
             gpa: parseFloat(formData.gpa),
-            interestLabel: formData.interests.join(", "), // original labels, for display
-            interests: interestValues,              // array, for algorithms
+            skillsDisplay: skillsDisplay,
+            skills: skillsDisplay.map(normalizeSkill),
+            interestsDisplay: interestsDisplay,
+            interests: interestsDisplay.map((s) => s.toLowerCase()),
           })
         );
 
