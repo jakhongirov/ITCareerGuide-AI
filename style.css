@@ -536,7 +536,7 @@ textarea:focus-visible {
   font-size: 0.76rem;
 }
 
-.field input,
+.field input:not([type="checkbox"]),
 .field select,
 .field textarea {
   font-family: var(--font-body);
@@ -569,13 +569,13 @@ textarea:focus-visible {
   color: var(--ink);
 }
 
-.field input:hover,
+.field input:not([type="checkbox"]):hover,
 .field select:hover,
 .field textarea:hover {
   border-color: var(--border-hairline-strong);
 }
 
-.field input:focus,
+.field input:not([type="checkbox"]):focus,
 .field select:focus,
 .field textarea:focus {
   border-color: var(--primary);
