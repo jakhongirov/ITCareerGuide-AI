@@ -172,72 +172,59 @@
               >
             </div>
 
-            <!-- Interests (text input, supplemented by quick-select tags) -->
+            <!-- Interests — multi-select checkboxes -->
             <div class="field" data-field="interests">
-              <label for="interests">
-                Primary Interest
-                <span class="hint">— choose closest match</span>
+              <label for="interestTags">
+                Interests
+                <span class="hint">— select all that apply</span>
               </label>
-              <select id="interests" name="interests" required>
-                <option value="" disabled selected>
-                  Select an interest area
-                </option>
-                <option value="Artificial Intelligence">
-                  Artificial Intelligence
-                </option>
-                <option value="Web Development">Web Development</option>
-                <option value="Cybersecurity">Cybersecurity</option>
-                <option value="Data Science">Data Science</option>
-                <option value="Cloud Computing">Cloud Computing</option>
-                <option value="Mobile Development">Mobile Development</option>
-              </select>
-              <span class="field__error">Please select an interest area.</span>
-            </div>
 
-            <!-- Quick-select interest tags for visual flair + faster input -->
-            <div class="interest-tags" id="interestTags">
-              <button
-                type="button"
-                class="tag-option"
-                data-value="Artificial Intelligence"
-              >
-                AI
-              </button>
-              <button
-                type="button"
-                class="tag-option"
-                data-value="Web Development"
-              >
-                Web Dev
-              </button>
-              <button
-                type="button"
-                class="tag-option"
-                data-value="Cybersecurity"
-              >
-                Cybersecurity
-              </button>
-              <button
-                type="button"
-                class="tag-option"
-                data-value="Data Science"
-              >
-                Data Science
-              </button>
-              <button
-                type="button"
-                class="tag-option"
-                data-value="Cloud Computing"
-              >
-                Cloud Computing
-              </button>
-              <button
-                type="button"
-                class="tag-option"
-                data-value="Mobile Development"
-              >
-                Mobile Dev
-              </button>
+              <!-- Real checkboxes (accessible, keyboard-friendly).
+                   Visually styled as pills via CSS below. -->
+              <div class="interest-tags" id="interestTags">
+                <label class="tag-option">
+                  <input type="checkbox" name="interests" value="Artificial Intelligence" />
+                  <span>AI</span>
+                </label>
+                <label class="tag-option">
+                  <input type="checkbox" name="interests" value="Web Development" />
+                  <span>Web Dev</span>
+                </label>
+                <label class="tag-option">
+                  <input type="checkbox" name="interests" value="Cybersecurity" />
+                  <span>Cybersecurity</span>
+                </label>
+                <label class="tag-option">
+                  <input type="checkbox" name="interests" value="Data Science" />
+                  <span>Data Science</span>
+                </label>
+                <label class="tag-option">
+                  <input type="checkbox" name="interests" value="Cloud Computing" />
+                  <span>Cloud Computing</span>
+                </label>
+                <label class="tag-option">
+                  <input type="checkbox" name="interests" value="Mobile Development" />
+                  <span>Mobile Dev</span>
+                </label>
+                <label class="tag-option">
+                  <input type="checkbox" name="interests" value="Game Development" />
+                  <span>Game Dev</span>
+                </label>
+                <label class="tag-option">
+                  <input type="checkbox" name="interests" value="Embedded Systems" />
+                  <span>Embedded Systems</span>
+                </label>
+                <label class="tag-option">
+                  <input type="checkbox" name="interests" value="Design" />
+                  <span>Design</span>
+                </label>
+                <label class="tag-option">
+                  <input type="checkbox" name="interests" value="Databases" />
+                  <span>Databases</span>
+                </label>
+              </div>
+
+              <span class="field__error">Please select at least one interest area.</span>
             </div>
 
             <div class="form__footer">
@@ -283,31 +270,25 @@
       /* ============================================================
        INPUT PAGE LOGIC
        - Validates the form (required fields, GPA range)
-       - Syncs quick-select tags with the interest dropdown
-       - Stores the profile in localStorage and redirects to results.html
+       - Interests are now MULTI-SELECT checkboxes (was single-select)
+       - Stores the profile in sessionStorage and redirects to results.html
        ============================================================ */
 
       const form = document.getElementById("careerForm");
-      const interestSelect = document.getElementById("interests");
-      const tagButtons = document.querySelectorAll(".tag-option");
+      const interestCheckboxes = document.querySelectorAll(
+        'input[name="interests"]'
+      );
 
-      // Clicking a quick-select tag sets the dropdown value and highlights the tag
-      tagButtons.forEach((btn) => {
-        btn.addEventListener("click", () => {
-          tagButtons.forEach((b) => b.classList.remove("selected"));
-          btn.classList.add("selected");
-          interestSelect.value = btn.dataset.value;
-          clearFieldError("interests");
-        });
-      });
-
-      // Keep tags in sync if the user picks directly from the dropdown
-      interestSelect.addEventListener("change", () => {
-        tagButtons.forEach((b) => {
-          b.classList.toggle(
+      // Keep the pill's "selected" look in sync with its checkbox.
+      // (Also handled by CSS :has(), this is a JS fallback +
+      // makes the visual update feel instant on click)
+      interestCheckboxes.forEach((checkbox) => {
+        checkbox.addEventListener("change", () => {
+          checkbox.closest(".tag-option").classList.toggle(
             "selected",
-            b.dataset.value === interestSelect.value
+            checkbox.checked
           );
+          if (checkbox.checked) clearFieldError("interests");
         });
       });
 
@@ -346,7 +327,8 @@
           setFieldError("gpa", false);
         }
 
-        if (!data.interests) {
+        // Now checks that AT LEAST ONE interest checkbox is selected
+        if (!data.interests || data.interests.length === 0) {
           setFieldError("interests", true);
           isValid = false;
         } else {
@@ -356,8 +338,8 @@
         return isValid;
       }
 
-      // Maps the dropdown's display labels to the exact interest
-      // strings used inside data.js (lowercase, sometimes worded
+      // Maps each checkbox's display label to the exact interest
+      // string used inside data.js (lowercase, sometimes worded
       // differently — e.g. "Mobile Development" -> "mobile apps")
       const INTEREST_MAP = {
         "Artificial Intelligence": "artificial intelligence",
@@ -366,16 +348,25 @@
         "Data Science": "data science",
         "Cloud Computing": "cloud computing",
         "Mobile Development": "mobile apps",
+        "Game Development": "game development",
+        "Embedded Systems": "embedded systems",
+        "Design": "design",
+        "Databases": "databases",
       };
 
       form.addEventListener("submit", (event) => {
         event.preventDefault();
 
+        // Collect every CHECKED interest checkbox (multi-select)
+        const selectedInterestLabels = Array.from(interestCheckboxes)
+          .filter((cb) => cb.checked)
+          .map((cb) => cb.value);
+
         const formData = {
           fullName: form.fullName.value,
           skills: form.skills.value,
           gpa: form.gpa.value,
-          interests: form.interests.value,
+          interests: selectedInterestLabels, // now an array, not a single string
         };
 
         if (!validateForm(formData)) {
@@ -389,9 +380,10 @@
           .map((s) => s.trim().toLowerCase())
           .filter((s) => s.length > 0);
 
-        const interestLabel = formData.interests; // original label, for display
-        const interestValue =
-          INTEREST_MAP[interestLabel] || interestLabel.toLowerCase();
+        // Map every selected label to data.js's interest vocabulary
+        const interestValues = formData.interests.map(
+          (label) => INTEREST_MAP[label] || label.toLowerCase()
+        );
 
         // Persist the structured profile so results.html can run
         // KNN, Decision Tree and the Recommender on it
@@ -399,11 +391,11 @@
           "careerMentorProfile",
           JSON.stringify({
             fullName: formData.fullName.trim(),
-            skillsRaw: formData.skills.trim(),   // original text, for display
-            skills: skillsArray,                  // parsed array, for algorithms
+            skillsRaw: formData.skills.trim(),     // original text, for display
+            skills: skillsArray,                    // parsed array, for algorithms
             gpa: parseFloat(formData.gpa),
-            interestLabel: interestLabel,         // original label, for display
-            interests: [interestValue],           // array, for algorithms
+            interestLabel: formData.interests.join(", "), // original labels, for display
+            interests: interestValues,              // array, for algorithms
           })
         );
 

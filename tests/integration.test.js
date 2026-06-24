@@ -89,6 +89,10 @@ const testProfiles = [
   { fullName: "Ravi", skillsRaw: "html, css, react", skills: ["html", "css", "react"], gpa: 3.0, interestLabel: "Web Development", interests: ["web development"] },
   { fullName: "Sofia", skillsRaw: "unity, c#", skills: ["unity", "c#"], gpa: 3.2, interestLabel: "Game Development", interests: ["game development"] },
   { fullName: "Daniel", skillsRaw: "arduino, c", skills: ["arduino", "c"], gpa: 3.4, interestLabel: "Embedded Systems", interests: ["embedded systems"] },
+
+  // ⚠️ NEW — multi-select interest profiles (previously only 1 interest was possible)
+  { fullName: "Nadia", skillsRaw: "python, sql", skills: ["python", "sql"], gpa: 3.6, interestLabel: "Artificial Intelligence, Data Science", interests: ["artificial intelligence", "data science"] },
+  { fullName: "Faiz", skillsRaw: "html, css, javascript, figma", skills: ["html", "css", "javascript", "figma"], gpa: 3.0, interestLabel: "Web Development, Design, Mobile Development", interests: ["web development", "design", "mobile apps"] },
 ];
 
 testProfiles.forEach((profile) => {

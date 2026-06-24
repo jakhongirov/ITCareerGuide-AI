@@ -622,6 +622,7 @@ textarea:focus-visible {
 }
 
 .tag-option {
+  position: relative;
   font-size: 0.82rem;
   padding: 8px 14px;
   border-radius: 999px;
@@ -629,6 +630,20 @@ textarea:focus-visible {
   background: rgba(255, 255, 255, 0.03);
   color: var(--muted);
   transition: all 0.25s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  user-select: none;
+}
+
+/* Hide the native checkbox visually but keep it accessible
+   (still focusable/clickable via the wrapping <label>) */
+.tag-option input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
 }
 
 .tag-option:hover {
@@ -639,11 +654,20 @@ textarea:focus-visible {
   transform: translateY(-1px);
 }
 
-.tag-option.selected {
+/* Selected state — driven by the checkbox's :checked state.
+   Works with both the live CSS :has() check AND the JS
+   "selected" class fallback for older browsers. */
+.tag-option.selected,
+.tag-option:has(input:checked) {
   background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   border-color: var(--primary-bright);
   color: #fff;
   box-shadow: var(--glow-primary);
+}
+
+.tag-option:focus-within {
+  outline: 2px solid var(--primary-bright);
+  outline-offset: 2px;
 }
 
 .form__footer {
