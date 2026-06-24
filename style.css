@@ -637,11 +637,14 @@ textarea:focus-visible {
 /* Hide the native checkbox visually but keep it accessible
    (still focusable/clickable via the wrapping <label>) */
 .tag-option input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
   position: absolute;
   opacity: 0;
   width: 0;
   height: 0;
   margin: 0;
+  pointer-events: none;
 }
 
 .tag-option:hover {
